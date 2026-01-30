@@ -1,0 +1,34 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run OCR worker",
+            "type": "shell",
+            "command": "python -u -m app.main",
+            "env": {
+                "INPUT_DIR": "${workspaceFolder}/data/in",
+                "OUTPUT_DIR": "${workspaceFolder}/data/out",
+                "OCR_SERVICE_URL": "https://ocr.jaimenet.com/"
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Run OCR worker (docker)",
+            "type": "shell",
+            "command": "docker run --rm -e OCR_SERVICE_URL=https://ocr.jaimenet.com/ -v ${workspaceFolder}/data/in:/data/in -v ${workspaceFolder}/data/out:/data/out ghcr.io/jaimemachado/rsync-docs:latest",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

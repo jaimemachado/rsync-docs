@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run OCR worker",
+      "type": "python",
+      "request": "launch",
+      "module": "app.main",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "INPUT_DIR": "${workspaceFolder}/data/in",
+        "OUTPUT_DIR": "${workspaceFolder}/data/out",
+        "OCR_SERVICE_URL": "https://ocr.jaimenet.com/"
+      }
+    }
+  ]
+}
