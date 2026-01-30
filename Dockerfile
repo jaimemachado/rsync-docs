@@ -11,4 +11,4 @@ ENV INPUT_DIR=/data/in
 ENV OUTPUT_DIR=/data/out
 ENV OCR_SERVICE_URL=http://ocr-service
 
-CMD ["python", "-u", "app/main.py"]
+CMD ["python", "-u", "-m", "app.main"]
