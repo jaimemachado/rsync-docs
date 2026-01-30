@@ -6,7 +6,7 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 jobs:
@@ -29,6 +29,35 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GH_TOKEN }}
 
+      - name: Compute semver version (bump minor when not a tag)
+        id: semver
+        run: |
+          set -euo pipefail
+          echo "GITHUB_REF=$GITHUB_REF"
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+          else
+            git fetch --tags --prune
+            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
+            echo "Latest tag: $LATEST_TAG"
+            if [[ "$LATEST_TAG" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+              MAJOR=${BASH_REMATCH[1]}
+              MINOR=${BASH_REMATCH[2]}
+              PATCH=${BASH_REMATCH[3]}
+            else
+              MAJOR=0
+              MINOR=0
+              PATCH=0
+            fi
+            NEW_MINOR=$((MINOR + 1))
+            VERSION="${MAJOR}.${NEW_MINOR}.0"
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git tag -a "$VERSION" -m "ci: bump version to $VERSION"
+            git push origin "refs/tags/$VERSION"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Syntax check (quick)
         uses: actions/setup-python@v4
         with:
@@ -47,5 +76,6 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/rsync-docs:latest
+            ghcr.io/${{ github.repository_owner }}/rsync-docs:${{ steps.semver.outputs.version }}
             ghcr.io/${{ github.repository_owner }}/rsync-docs:${{ github.sha }}
           platforms: linux/amd64,linux/arm64
