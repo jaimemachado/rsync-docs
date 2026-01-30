@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ocr-cronjob
+spec:
+  schedule: "0 * * * *" # run hourly by default
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: ocr-worker
+              image: REPLACE_WITH_IMAGE
+              env:
+                - name: INPUT_DIR
+                  value: "/data/in"
+                - name: OUTPUT_DIR
+                  value: "/data/out"
+                - name: OCR_SERVICE_URL
+                  value: "http://ocr-service:8000"
+              volumeMounts:
+                - name: data-in
+                  mountPath: /data/in
+                - name: data-out
+                  mountPath: /data/out
+          restartPolicy: OnFailure
+          volumes:
+            # Replace these with your PVCs or hostPath as appropriate
+            - name: data-in
+              emptyDir: {}
+            - name: data-out
+              emptyDir: {}
